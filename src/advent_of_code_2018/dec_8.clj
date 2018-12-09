@@ -18,3 +18,23 @@
 
 (defn- solve-1 [input]
   (apply + (first (recursive-solve-1 input))))
+
+(defn- recursive-solve-2 [remaining-data]
+  (let [[num-nodes num-metadata & leftovers] remaining-data
+        [m leftover] (reduce (fn [[meta r] _]
+                               (let [[m rr] (recursive-solve-2 r)]
+                                 [(conj meta m) rr]))
+                             [[] leftovers]
+                             (range num-nodes))]
+    [(concat (take num-metadata leftover) [m]) (drop num-metadata leftover)]))
+
+(defn- get-value [node]
+  (let [meta (butlast node)
+        children (last node)]
+    (if (empty? children)
+      (apply + meta)
+      (apply + (map get-value (map #(get children (dec %) []) meta))))))
+
+(defn- solve-2 [input]
+  (let [root (first (recursive-solve-2 input))]
+    (get-value root)))
